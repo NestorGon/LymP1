@@ -1,0 +1,345 @@
+/*
+Gramatica para el Robot:
+Autor: Alejandro Arango
+Modificado por: Silvia Takahashi
+Modificado por: Juan Pablo Morales.
+Agregadas producciones para manejar globos
+Modificado por Silvia Takahashi
+Eliminadas producciones para manejar globos
+Agregado el esqueleto para la traduccion
+Modificado por Silvia Takahashi 
+Re: Agregar Reglas para el manejo de globos
+Modificado por Saulo Daza y Sonia Vivas
+Modificado por Silvia Takahashi
+Eliminadas reglas de traducci�n DE  MARCROS
+Cambio del lenguaje de comandos
+Modificado por Silvia Takahashi: algunas Reglas para traduccion
+Modificado por Silvia Takahashi: Cambio en el lenguaje
+Abril: 2008 - Simplificado apra solo interpretaci�n
+ **/
+
+options
+{
+  LOOKAHEAD= 1;
+
+  IGNORE_CASE = false;
+  STATIC = false;
+}
+
+PARSER_BEGIN(Robot)
+package uniandes.lym.robot.control;
+import uniandes.lym.robot.kernel.*;
+import java.awt.Point;
+import java.io.*;
+import java.util.Vector;
+import java.util.LinkedList;
+import java.util.ArrayList;
+@ SuppressWarnings("serial") 
+public class Robot
+{
+  private RobotWorldDec world;
+  private ArrayList<String> variables = new ArrayList<String>();
+  private ArrayList<String> functions = new ArrayList<String>();
+
+  void setWorld(RobotWorld w)
+  {
+    world = (RobotWorldDec) w;	
+  }
+  String salida = new String();
+}
+
+PARSER_END(Robot)
+
+SKIP :
+{
+  " "
+| 	"\r"
+| 	"\t"
+  //	| "\n"
+}
+
+TOKEN : /* Nombres de Comandos */
+{
+  < T_MOVE : "MOVE" >
+| 	< T_RIGHT : "RIGHT" >
+| 	< T_LEFT : "LEFT" >
+| 	< T_ROTATE : "ROTATE" >
+| 	< T_LOOK : "LOOK" >
+| 	< T_DROP : "DROP" >
+| 	< T_FREE : "FREE" >
+| 	< T_PICK : "PICK" >
+| 	< T_POP : "POP" >
+| 	< T_CHECK : "CHECK" >
+| 	< T_BLOCKEDP : "BLOCKEDP" >
+| 	< T_NOP : "NOP" >
+| 	< T_BLOCK : "BLOCK" >
+| 	< T_REPEAT : "REPEAT" >
+| 	< T_IF : "IF" >
+| 	< T_DEFINE : "DEFINE" >
+| 	< T_TO : "TO" >
+| 	< T_OUTPUT : "OUTPUT" >
+| 	< T_END : "END" >		
+}
+
+TOKEN :
+{
+  < T_BALLOONS : "B" >
+| 	< T_CHIPS : "C" >
+| 	< T_NORTH : "NORTH" >
+| 	< T_EAST : "EAST" >
+| 	< T_WEST : "WEST" >
+| 	< T_SOUTH : "SOUTH" >
+}
+
+TOKEN :
+{
+  < NUMERO : (< DIGIT >)+ >
+| 	< #DIGIT : [ "0"-"9" ] >
+|	< NAME: ([ "a"-"z" ])+>
+}
+
+boolean command(StringBuffer sistema) :
+{	
+  int x;
+  salida = new String();
+}
+{
+  (
+    < T_TURNRIGHT > "(" ")"
+    {
+      world.turnRight();
+      salida = "Command: Turnright";
+    }
+  | 	< T_MOVER > "(" x = numero() ")"
+    {
+      world.moveForward(x);
+      salida = "Command: Moveforward ";
+    }
+  | < T_PONER > "(" objetoPoner() ")"								
+  | < T_RECOGER > "(" objetoRecoger() ")"	
+  | < T_POP > "(" x = numero() ")"
+    {
+      world.popBalloons(x);
+      salida = "Comando:  Pop";
+    }
+  )
+  "\n"
+  {
+    //  try {
+    //		 Thread.sleep(1);
+    //   } catch (InterruptedException e) {
+    //	        System.err.format("IOException: %s%n", e);
+    //	    }
+    sistema.append(salida);
+    return true;
+  }
+| "\n"
+  {
+    return true;
+  }
+| < EOF >
+  {
+    return false;
+  }
+}
+
+void objetoPoner() :
+{
+  int f = 1;	
+}
+{
+  (
+    < T_CHIPS > "," f = numero()
+    {
+      world.putChips(f);
+      salida = "Command:  Put Chips";
+    }
+  )
+|	
+  (
+    < T_BALLOONS > "," f = numero()
+    {
+      world.putBalloons(f);
+      salida = "Command:  Put Balloons";
+    }
+  )	
+}
+
+
+void objetoRecoger() :
+{
+  int f = 1;	
+}
+{
+  (
+    < T_CHIPS > "," f = numero()
+    {
+      world.pickChips(f);
+      salida = "Command:  Pick chips";
+    }
+  )
+|	
+  (
+    < T_BALLOONS > "," f = numero()
+    {
+      world.grabBalloons(f);
+      salida = "Command:  Pick balloons";
+    }
+  )	
+}
+
+/**
+*  reconoce un numero entero sin signo
+* @return el valor entero correspondiente al valor reconocido
+*/
+int numero() throws Error :
+{	
+  int total = 1;
+}
+{
+  < NUMERO >
+  {
+    try
+    {
+      total = Integer.parseInt(token.image);
+    }
+    catch (NumberFormatException ee)
+    {
+      // Dada la forma de NUMERO, sabemos que solo puede tener d�gitos
+      // Por lo tanto, lo unico que podria pasar es que el numero sea muy grande
+      throw new Error("Number out of bounds: " + token.image + "!!");
+    }
+    return total;
+  }
+}
+
+void move() throws Error:
+{
+}
+{
+  < T_MOVE > numOrVar()
+}
+
+void right() throws Error:
+{
+}
+{
+  < T_RIGHT > numOrVar()
+}
+
+void left() throws Error:
+{
+}
+{
+  < T_LEFT > numOrVar()
+}
+
+void rotate() throws Error:
+{
+}
+{
+  < T_ROTATE > numOrVar()
+}
+
+void look():
+{
+}
+{
+  < T_LOOK > ( < T_NORTH > | < T_EAST > | < T_WEST > | < T_SOUTH > )
+}
+
+void drop() throws Error:
+{
+}
+{
+  < T_DROP > numOrVar()
+}
+
+void free() throws Error:
+{
+}
+{
+  < T_FREE > numOrVar()
+}
+
+void pick() throws Error:
+{
+}
+{
+  < T_PICK > numOrVar()
+}
+
+void pop() throws Error:
+{
+}
+{
+  < T_POP > numOrVar()
+}
+
+void check() throws Error:
+{
+}
+{
+  < T_CHECK > ( < T_CHIPS > | < T_BALLONS > ) numOrVar()
+}
+
+void commands() throws Error:
+{
+}
+{
+  (
+    (      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()
+	) "\n"
+  )+
+}
+
+void block() :
+{
+}
+{
+  "(" < T_BLOCK > ["\n"]
+  commands()
+  ")"
+}
+
+void repeat() :
+{
+}
+{
+  < T_REPEAT > numOrVar() "[" ["\n"]
+  commands()
+  "]"
+}
+
+void if() :
+{
+}
+{
+  < T_IF > ("!")* < T_BLOCKEDP > "[" ["\n"]
+  commands()
+  "]"
+}
+
+void define() :
+{
+  Token x;
+  ArrayList<String> parameters = new ArrayList<String>();
+}
+{
+  < T_TO > (x=< NAME > { functions.add(x.image); })
+  (
+    ":" (x=< NAME > { parameters.add(x.image); })  )* "\n"
+  < T_OUTPUT > "\n"
+  < T_END >
+}
+
+void numOrVar() throws Error:
+{
+  Token x;
+}
+{
+  (numero()
+  | (x=<NAME> {
+    if (!variables.contains(x.image)) {
+      throw new Error("The variable " + x.image + " is not defined");}}))
+}
