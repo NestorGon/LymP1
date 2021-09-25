@@ -40,6 +40,8 @@ public class Robot
   private RobotWorldDec world;
   private ArrayList<String> variables = new ArrayList<String>();
   private ArrayList<String> functions = new ArrayList<String>();
+  private ArrayList<Integer> funcParam = new ArrayList<Integer>();
+  private ArrayList<String> parameters = new ArrayList<String>();
 
   void setWorld(RobotWorld w)
   {
@@ -283,6 +285,24 @@ void check() throws Error:
   < T_CHECK > ( < T_CHIPS > | < T_BALLONS > ) numOrVar()
 }
 
+void callFunction() :
+{
+  Token x;
+  int numParameters;
+  boolean func = parameters.size()>0;
+}
+{
+  (x=< NAME > {
+    if (!functions.contains(x.image)) {
+      throw new Error("The function isn't defined");
+    }
+    else {
+      numParameters = funcParam.get(functions.indexOf(x.image));
+    }
+    })
+    
+}
+
 void commands() throws Error:
 {
 }
@@ -320,26 +340,46 @@ void if() :
   "]"
 }
 
-void define() :
+void function() :
 {
   Token x;
-  ArrayList<String> parameters = new ArrayList<String>();
+  int numParams = 0;
 }
 {
   < T_TO > (x=< NAME > { functions.add(x.image); })
   (
-    ":" (x=< NAME > { parameters.add(x.image); })  )* "\n"
+    ":" (x=< NAME > { parameters.add(x.image); numParams++; })  )* "\n"
+  {funcParam.add(numParams);}
   < T_OUTPUT > "\n"
   < T_END >
+  {
+    parameters = new ArrayList<String>();
+  }
 }
 
 void numOrVar() throws Error:
 {
   Token x;
+  boolean func = parameters.size()>0;
+  boolean isParam = false;
 }
 {
   (numero()
-  | (x=<NAME> {
+  | ([":" {isParam = true;
+  			if ( !func ) {
+  			  throw new Error("Can't use parameters if not inside function");
+  			  }
+  		}]
+  	(x=<NAME> {      
     if (!variables.contains(x.image)) {
-      throw new Error("The variable " + x.image + " is not defined");}}))
+      if ( isParam ) { 
+	      if ( !parameters.contains(x.image)) {
+	        throw new Error("The variable " + x.image + " is not defined in the parameters of the function");
+	      }
+	  } else { 
+      	throw new Error("The variable " + x.image + " is not defined");
+      }
+     }
+   }))
+ )
 }
