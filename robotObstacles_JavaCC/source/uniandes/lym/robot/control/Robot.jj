@@ -97,7 +97,8 @@ TOKEN :
 {
   < NUMERO : (< DIGIT >)+ >
 | 	< #DIGIT : [ "0"-"9" ] >
-|	< NAME: ([ "a"-"z" ])+>
+//modifico name para que siempre empice con un LowerCase 
+|	< NAME: "a"-"z"([ "A"-"Z" ]["a"-"z"])+>
 }
 
 boolean command(StringBuffer sistema) :
@@ -127,11 +128,6 @@ boolean command(StringBuffer sistema) :
   )
   "\n"
   {
-    //  try {
-    //		 Thread.sleep(1);
-    //   } catch (InterruptedException e) {
-    //	        System.err.format("IOException: %s%n", e);
-    //	    }
     sistema.append(salida);
     return true;
   }
@@ -215,6 +211,9 @@ int numero() throws Error :
   }
 }
 
+/*
+/Metodo que define la funcion Move
+*/
 void move() throws Error:
 {
 }
@@ -222,6 +221,9 @@ void move() throws Error:
   < T_MOVE > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Right
+*/
 void right() throws Error:
 {
 }
@@ -229,6 +231,9 @@ void right() throws Error:
   < T_RIGHT > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Left
+*/
 void left() throws Error:
 {
 }
@@ -236,6 +241,9 @@ void left() throws Error:
   < T_LEFT > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Rotate
+*/
 void rotate() throws Error:
 {
 }
@@ -243,6 +251,9 @@ void rotate() throws Error:
   < T_ROTATE > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Look
+*/
 void look():
 {
 }
@@ -250,6 +261,9 @@ void look():
   < T_LOOK > ( < T_NORTH > | < T_EAST > | < T_WEST > | < T_SOUTH > )
 }
 
+/*
+/Metodo que define la funcion Drop
+*/
 void drop() throws Error:
 {
 }
@@ -257,6 +271,9 @@ void drop() throws Error:
   < T_DROP > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Free
+*/
 void free() throws Error:
 {
 }
@@ -264,12 +281,19 @@ void free() throws Error:
   < T_FREE > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Pick
+*/
 void pick() throws Error:
 {
 }
 {
   < T_PICK > numOrVar()
 }
+
+/*
+/Metodo que define la funcion Pop
+*/
 
 void pop() throws Error:
 {
@@ -278,6 +302,10 @@ void pop() throws Error:
   < T_POP > numOrVar()
 }
 
+/*
+/Metodo que define la funcion Check
+*/
+
 void check() throws Error:
 {
 }
@@ -285,6 +313,9 @@ void check() throws Error:
   < T_CHECK > ( < T_CHIPS > | < T_BALLONS > ) numOrVar()
 }
 
+/*
+/Metodo que llama a una funcion existente
+*/
 void callFunction() :
 {
   Token x;
@@ -303,16 +334,22 @@ void callFunction() :
     
 }
 
+/*
+/Metodo que chequea todos los posibles comandos que se pueden ejecutar
+*/
 void commands() throws Error:
 {
 }
 {
   (
-    (      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()
+    (      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()| define()|repeat()|block()|ifs()
 	) "\n"
   )+
 }
 
+/*
+/Metodo que define Block
+*/
 void block() :
 {
 }
@@ -322,6 +359,9 @@ void block() :
   ")"
 }
 
+/*
+/Metodo que define la funcion Repeat
+*/
 void repeat() :
 {
 }
@@ -331,7 +371,10 @@ void repeat() :
   "]"
 }
 
-void if() :
+/*
+/Metodo que define la funcion IF (cambie el nombre porque estaba sobreescribiendo el metodo if como tal)
+*/
+void ifs() :
 {
 }
 {
@@ -340,6 +383,9 @@ void if() :
   "]"
 }
 
+/*
+/Metodo que define la funcion TO
+*/
 void function() :
 {
   Token x;
@@ -357,6 +403,10 @@ void function() :
   }
 }
 
+/*
+/Metodo que evalua si un parametro es una variable existente o un entero
+/Se utiliza el metodo numero() para comprobar si es un entero y se revisa la lista de variables para verificar si ya existe la variable
+*/
 void numOrVar() throws Error:
 {
   Token x;
@@ -383,3 +433,28 @@ void numOrVar() throws Error:
    }))
  )
 }
+
+
+/*
+/Metodo que define la funcion DEFINE
+/Se revisa que la funcion no haya sido declarada previamente
+*/
+void define() throws Error:
+{
+  String nombre = "";
+}
+{
+	<T_DEFINE> <NAME>
+	{
+	  nombre = Token.image;
+	  if(variables.contains(nombre)) {
+		throw new Error("Ya hay una variable con ese nombre");
+	  }
+	  else {
+		variables.add(nombre);
+	  }
+	}
+	numero()"\n"
+  
+}
+ 
