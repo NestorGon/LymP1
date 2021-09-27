@@ -107,83 +107,21 @@ boolean command(StringBuffer sistema) :
   salida = new String();
 }
 {
-  (
-    < T_TURNRIGHT > "(" ")"
-    {
-      world.turnRight();
-      salida = "Command: Turnright";
-    }
-  | 	< T_MOVER > "(" x = numero() ")"
-    {
-      world.moveForward(x);
-      salida = "Command: Moveforward ";
-    }
-  | < T_PONER > "(" objetoPoner() ")"								
-  | < T_RECOGER > "(" objetoRecoger() ")"	
-  | < T_POP > "(" x = numero() ")"
-    {
-      world.popBalloons(x);
-      salida = "Comando:  Pop";
-    }
-  )
-  "\n"
-  {
-    sistema.append(salida);
-    return true;
-  }
-| "\n"
-  {
-    return true;
-  }
-| < EOF >
-  {
-    return false;
-  }
+   //Preguntar que poner aqui
 }
 
-void objetoPoner() :
+/*
+/Metodo que chequea todos los posibles comandos que se pueden ejecutar
+*/
+void commands() throws Error:
 {
-  int f = 1;	
 }
 {
   (
-    < T_CHIPS > "," f = numero()
-    {
-      world.putChips(f);
-      salida = "Command:  Put Chips";
-    }
-  )
-|	
-  (
-    < T_BALLOONS > "," f = numero()
-    {
-      world.putBalloons(f);
-      salida = "Command:  Put Balloons";
-    }
-  )	
-}
-
-
-void objetoRecoger() :
-{
-  int f = 1;	
-}
-{
-  (
-    < T_CHIPS > "," f = numero()
-    {
-      world.pickChips(f);
-      salida = "Command:  Pick chips";
-    }
-  )
-|	
-  (
-    < T_BALLOONS > "," f = numero()
-    {
-      world.grabBalloons(f);
-      salida = "Command:  Pick balloons";
-    }
-  )	
+    (
+      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()|block()|repeat()|ifs()|define()|function()
+	) "\n"
+  )+
 }
 
 /**
@@ -313,6 +251,93 @@ void check() throws Error:
   < T_CHECK > ( < T_CHIPS > | < T_BALLONS > ) numOrVar()
 }
 
+
+/*
+/Metodo que define Block
+*/
+void block() :
+{
+}
+{
+  "(" < T_BLOCK > ["\n"]
+  commands()["\n"]
+  ")"
+}
+
+/*
+/Metodo que define la funcion Repeat
+*/
+void repeat() :
+{
+}
+{
+  < T_REPEAT > numOrVar() "[" ["\n"]
+  commands()["\n"]
+  "]"
+}
+
+/*
+/Metodo que define la funcion IF (cambie el nombre porque estaba sobreescribiendo el metodo if como tal)
+*/
+void ifs() :
+{
+}
+{
+  < T_IF > ("!")* < T_BLOCKEDP > "[" ["\n"]
+  commands()["\n"]
+  "]"
+}
+
+/*
+/Metodo que define la funcion DEFINE
+/Se revisa que la funcion no haya sido declarada previamente
+*/
+void define() throws Error:
+{
+  String nombre = "";
+}
+{
+	<T_DEFINE> <NAME>
+	{
+	  nombre = Token.image;
+	  if(variables.contains(nombre)) {
+		throw new Error("Ya hay una variable con ese nombre");
+	  }
+	  else {
+		variables.add(nombre);
+	  }
+	}
+	numero()"\n"
+  
+}
+ 
+/*
+/Metodo que define la funcion TO
+*/
+void function() throws Error:
+{
+  Token x;
+  int numParams = 0;
+}
+{
+  < T_TO > (x=< NAME > {
+    //Revisar si ya se declaro anteriormente esta variable
+	if(variables.contains(x)||functions.contains(x)) throw new Error("la funcion ya esta declarada");
+    functions.add(x.image); })
+  (
+    ":" (x=< NAME > {
+		//Revisar si ya se declaro anteriormente esta variable
+		if(variables.contains(x)||functions.contains(x)) throw new Error("la funcion ya esta declarada");
+      parameters.add(x.image); numParams++; })  )* "\n"
+  {funcParam.add(numParams);}
+  < T_OUTPUT > "\n"
+  commands()
+  < T_END >
+  {
+    parameters = new ArrayList<String>();
+  }
+}
+
 /*
 /Metodo que llama a una funcion existente
 */
@@ -332,75 +357,6 @@ void callFunction() :
     }
     })
     
-}
-
-/*
-/Metodo que chequea todos los posibles comandos que se pueden ejecutar
-*/
-void commands() throws Error:
-{
-}
-{
-  (
-    (      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()| define()|repeat()|block()|ifs()
-	) "\n"
-  )+
-}
-
-/*
-/Metodo que define Block
-*/
-void block() :
-{
-}
-{
-  "(" < T_BLOCK > ["\n"]
-  commands()
-  ")"
-}
-
-/*
-/Metodo que define la funcion Repeat
-*/
-void repeat() :
-{
-}
-{
-  < T_REPEAT > numOrVar() "[" ["\n"]
-  commands()
-  "]"
-}
-
-/*
-/Metodo que define la funcion IF (cambie el nombre porque estaba sobreescribiendo el metodo if como tal)
-*/
-void ifs() :
-{
-}
-{
-  < T_IF > ("!")* < T_BLOCKEDP > "[" ["\n"]
-  commands()
-  "]"
-}
-
-/*
-/Metodo que define la funcion TO
-*/
-void function() :
-{
-  Token x;
-  int numParams = 0;
-}
-{
-  < T_TO > (x=< NAME > { functions.add(x.image); })
-  (
-    ":" (x=< NAME > { parameters.add(x.image); numParams++; })  )* "\n"
-  {funcParam.add(numParams);}
-  < T_OUTPUT > "\n"
-  < T_END >
-  {
-    parameters = new ArrayList<String>();
-  }
 }
 
 /*
@@ -435,26 +391,4 @@ void numOrVar() throws Error:
 }
 
 
-/*
-/Metodo que define la funcion DEFINE
-/Se revisa que la funcion no haya sido declarada previamente
-*/
-void define() throws Error:
-{
-  String nombre = "";
-}
-{
-	<T_DEFINE> <NAME>
-	{
-	  nombre = Token.image;
-	  if(variables.contains(nombre)) {
-		throw new Error("Ya hay una variable con ese nombre");
-	  }
-	  else {
-		variables.add(nombre);
-	  }
-	}
-	numero()"\n"
-  
-}
- 
+
