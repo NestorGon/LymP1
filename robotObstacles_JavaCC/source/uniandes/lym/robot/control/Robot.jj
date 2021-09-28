@@ -98,7 +98,7 @@ TOKEN :
   < NUMERO : (< DIGIT >)+ >
 | 	< #DIGIT : [ "0"-"9" ] >
 //modifico name para que siempre empice con un LowerCase 
-|	< NAME: "a"-"z"([ "A"-"Z" ]["a"-"z"])+>
+|	< NAME: ["a"-"z"]([ "A"-"Z" ]|["a"-"z"])*>
 }
 
 boolean command(StringBuffer sistema) :
@@ -108,6 +108,8 @@ boolean command(StringBuffer sistema) :
 }
 {
    //Preguntar que poner aqui
+   ( commands() )*
+   {return false;}
 }
 
 /*
@@ -118,9 +120,24 @@ void commands() throws Error:
 }
 {
   (
-    (
-      move() | right() | left() | rotate() | look() | drop() | free() | pick() | pop() | check()|block()|repeat()|ifs()|define()|function()
-	) "\n"
+    move()
+  | right()
+  | left()
+  | rotate()
+  | look()
+  | drop()
+  | free()
+  | pick()
+  | pop()
+  | check()
+  | block()
+  | repeat()
+  | ifs()
+  | define()
+  | function()
+  | callFunction()
+  | < T_NOP >
+  | "\n"
   )+
 }
 
@@ -248,7 +265,7 @@ void check() throws Error:
 {
 }
 {
-  < T_CHECK > ( < T_CHIPS > | < T_BALLONS > ) numOrVar()
+  < T_CHECK > ( < T_CHIPS > | < T_BALLOONS > ) numOrVar()
 }
 
 
@@ -299,9 +316,9 @@ void define() throws Error:
 {
 	<T_DEFINE> <NAME>
 	{
-	  nombre = Token.image;
+	  nombre = token.image;
 	  if(variables.contains(nombre)) {
-		throw new Error("Ya hay una variable con ese nombre");
+		throw new Error("The variable is already defined");
 	  }
 	  else {
 		variables.add(nombre);
@@ -318,19 +335,27 @@ void function() throws Error:
 {
   Token x;
   int numParams = 0;
+  boolean func = parameters.size()>0;
 }
 {
+  {
+    if ( func )
+    	throw new Error("Can't create a function inside another function");
+  }
   < T_TO > (x=< NAME > {
     //Revisar si ya se declaro anteriormente esta variable
-	if(variables.contains(x)||functions.contains(x)) throw new Error("la funcion ya esta declarada");
+	if(variables.contains(x)||functions.contains(x))
+		throw new Error("The function is already defined");
     functions.add(x.image); })
   (
     ":" (x=< NAME > {
 		//Revisar si ya se declaro anteriormente esta variable
-		if(variables.contains(x)||functions.contains(x)) throw new Error("la funcion ya esta declarada");
-      parameters.add(x.image); numParams++; })  )* "\n"
+		if(variables.contains(x)||functions.contains(x))
+			throw new Error("The parameter is already defined");
+      	parameters.add(x.image);
+      	numParams++; })  )* "\n"
   {funcParam.add(numParams);}
-  < T_OUTPUT > "\n"
+  < T_OUTPUT >
   commands()
   < T_END >
   {
@@ -356,7 +381,13 @@ void callFunction() :
       numParameters = funcParam.get(functions.indexOf(x.image));
     }
     })
+    ( numOrVar() {numParameters--;} )*
     
+    {
+      if (numParameters != 0) {
+        throw new Error("The function call doesn't contain the right ammount of parameters");
+      }
+    }
 }
 
 /*
@@ -370,7 +401,7 @@ void numOrVar() throws Error:
   boolean isParam = false;
 }
 {
-  (numero()
+  (numero())
   | ([":" {isParam = true;
   			if ( !func ) {
   			  throw new Error("Can't use parameters if not inside function");
@@ -387,7 +418,6 @@ void numOrVar() throws Error:
       }
      }
    }))
- )
 }
 
 
