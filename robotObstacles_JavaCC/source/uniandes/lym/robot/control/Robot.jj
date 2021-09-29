@@ -34,20 +34,20 @@ import java.io.*;
 import java.util.Vector;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.HashMap;
 @ SuppressWarnings("serial") 
 public class Robot
 {
   private RobotWorldDec world;
-  private ArrayList<String> variables = new ArrayList<String>();
+  private HashMap<String,Integer> variables = new HashMap<String,Integer>();
   private ArrayList<String> functions = new ArrayList<String>();
   private ArrayList<Integer> funcParam = new ArrayList<Integer>();
   private ArrayList<String> parameters = new ArrayList<String>();
-
+  private String salida = new String();
   void setWorld(RobotWorld w)
   {
     world = (RobotWorldDec) w;	
   }
-  String salida = new String();
 }
 
 PARSER_END(Robot)
@@ -104,12 +104,14 @@ TOKEN :
 boolean command(StringBuffer sistema) :
 {	
   int x;
-  salida = new String();
 }
 {
-   //Preguntar que poner aqui
-   ( commands() )*
-   {return false;}
+   (commands())*
+   {
+   System.out.println(salida);
+   sistema.append(salida);
+   return false;
+   }
 }
 
 /*
@@ -171,9 +173,16 @@ int numero() throws Error :
 */
 void move() throws Error:
 {
+  int val = 0;
 }
 {
-  < T_MOVE > numOrVar()
+  < T_MOVE >
+  val = numOrVar()
+  {
+   world.moveForward(val);
+   salida ="comando moveForward";
+  }
+  "\n"
 }
 
 /*
@@ -181,9 +190,14 @@ void move() throws Error:
 */
 void right() throws Error:
 {
+  int val = 0;
 }
 {
   < T_RIGHT > numOrVar()
+  {
+   world.turnRight();
+   salida ="comando turnRight";
+  }
 }
 
 /*
@@ -203,7 +217,7 @@ void rotate() throws Error:
 {
 }
 {
-  < T_ROTATE > numOrVar()
+  < T_ROTATE > numOrVar() 
 }
 
 /*
@@ -317,14 +331,18 @@ void define() throws Error:
 	<T_DEFINE> <NAME>
 	{
 	  nombre = token.image;
-	  if(variables.contains(nombre)) {
+	  if(variables.containsKey(nombre)) {
 		throw new Error("The variable is already defined");
 	  }
-	  else {
-		variables.add(nombre);
-	  }
+	  
+		
+	  
 	}
-	numero()"\n"
+	numero()
+	{
+	variables.put(nombre,Integer.parseInt(token.image));
+	}
+	"\n"
   
 }
  
@@ -344,13 +362,13 @@ void function() throws Error:
   }
   < T_TO > (x=< NAME > {
     //Revisar si ya se declaro anteriormente esta variable
-	if(variables.contains(x)||functions.contains(x))
+	if(variables.containsKey(x)||functions.contains(x))
 		throw new Error("The function is already defined");
     functions.add(x.image); })
   (
     ":" (x=< NAME > {
 		//Revisar si ya se declaro anteriormente esta variable
-		if(variables.contains(x)||functions.contains(x))
+		if(variables.containsKey(x)||functions.contains(x))
 			throw new Error("The parameter is already defined");
       	parameters.add(x.image);
       	numParams++; })  )* "\n"
@@ -374,7 +392,7 @@ void callFunction() :
 }
 {
   (x=< NAME > {
-    if (!functions.contains(x.image)) {
+    if (!functions.contains(Integer.parseInt(x.image))) {
       throw new Error("The function isn't defined");
     }
     else {
@@ -394,28 +412,33 @@ void callFunction() :
 /Metodo que evalua si un parametro es una variable existente o un entero
 /Se utiliza el metodo numero() para comprobar si es un entero y se revisa la lista de variables para verificar si ya existe la variable
 */
-void numOrVar() throws Error:
+int numOrVar() throws Error:
 {
   Token x;
   boolean func = parameters.size()>0;
   boolean isParam = false;
+  int val = 0;
 }
 {
-  (numero())
+  (val = numero())
+  {
+	return val;
+  }
   | ([":" {isParam = true;
   			if ( !func ) {
   			  throw new Error("Can't use parameters if not inside function");
   			  }
   		}]
   	(x=<NAME> {      
-    if (!variables.contains(x.image)) {
+    if (!variables.containsKey(x.image)) {
       if ( isParam ) { 
-	      if ( !parameters.contains(x.image)) {
+	      if ( !parameters.contains(Integer.parseInt(x.image))) {
 	        throw new Error("The variable " + x.image + " is not defined in the parameters of the function");
 	      }
 	  } else { 
       	throw new Error("The variable " + x.image + " is not defined");
       }
+     return variables.get(x);
      }
    }))
 }

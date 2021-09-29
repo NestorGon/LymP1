@@ -6,23 +6,22 @@ import java.io.*;
 import java.util.Vector;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.HashMap;
 @ SuppressWarnings("serial")
 public class Robot implements RobotConstants {
   private RobotWorldDec world;
-  private ArrayList<String> variables = new ArrayList<String>();
+  private HashMap<String,Integer> variables = new HashMap<String,Integer>();
   private ArrayList<String> functions = new ArrayList<String>();
   private ArrayList<Integer> funcParam = new ArrayList<Integer>();
   private ArrayList<String> parameters = new ArrayList<String>();
-
+  private String salida = new String();
   void setWorld(RobotWorld w)
   {
     world = (RobotWorldDec) w;
   }
-  String salida = new String();
 
   final public boolean command(StringBuffer sistema) throws ParseException {
   int x;
-  salida = new String();
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -52,7 +51,9 @@ public class Robot implements RobotConstants {
       }
       commands();
     }
-    {if (true) return false;}
+   System.out.println(salida);
+   sistema.append(salida);
+   {if (true) return false;}
     throw new Error("Missing return statement in function");
   }
 
@@ -175,16 +176,23 @@ public class Robot implements RobotConstants {
 /Metodo que define la funcion Move
 */
   final public void move() throws ParseException, Error {
+  int val = 0;
     jj_consume_token(T_MOVE);
-    numOrVar();
+    val = numOrVar();
+   world.moveForward(val);
+   salida ="comando moveForward";
+    jj_consume_token(32);
   }
 
 /*
 /Metodo que define la funcion Right
 */
   final public void right() throws ParseException, Error {
+  int val = 0;
     jj_consume_token(T_RIGHT);
     numOrVar();
+   world.turnRight();
+   salida ="comando turnRight";
   }
 
 /*
@@ -381,13 +389,11 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_DEFINE);
     jj_consume_token(NAME);
           nombre = token.image;
-          if(variables.contains(nombre)) {
+          if(variables.containsKey(nombre)) {
                 {if (true) throw new Error("The variable is already defined");}
           }
-          else {
-                variables.add(nombre);
-          }
     numero();
+        variables.put(nombre,Integer.parseInt(token.image));
     jj_consume_token(32);
   }
 
@@ -403,7 +409,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_TO);
     x = jj_consume_token(NAME);
     //Revisar si ya se declaro anteriormente esta variable
-        if(variables.contains(x)||functions.contains(x))
+        if(variables.containsKey(x)||functions.contains(x))
                 {if (true) throw new Error("The function is already defined");}
     functions.add(x.image);
     label_4:
@@ -419,7 +425,7 @@ public class Robot implements RobotConstants {
       jj_consume_token(38);
       x = jj_consume_token(NAME);
                 //Revisar si ya se declaro anteriormente esta variable
-                if(variables.contains(x)||functions.contains(x))
+                if(variables.containsKey(x)||functions.contains(x))
                         {if (true) throw new Error("The parameter is already defined");}
         parameters.add(x.image);
         numParams++;
@@ -440,7 +446,7 @@ public class Robot implements RobotConstants {
   int numParameters;
   boolean func = parameters.size()>0;
     x = jj_consume_token(NAME);
-    if (!functions.contains(x.image)) {
+    if (!functions.contains(Integer.parseInt(x.image))) {
       {if (true) throw new Error("The function isn't defined");}
     }
     else {
@@ -470,13 +476,15 @@ public class Robot implements RobotConstants {
 /Metodo que evalua si un parametro es una variable existente o un entero
 /Se utiliza el metodo numero() para comprobar si es un entero y se revisa la lista de variables para verificar si ya existe la variable
 */
-  final public void numOrVar() throws ParseException, Error {
+  final public int numOrVar() throws ParseException, Error {
   Token x;
   boolean func = parameters.size()>0;
   boolean isParam = false;
+  int val = 0;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUMERO:
-      numero();
+      val = numero();
+        {if (true) return val;}
       break;
     case NAME:
     case 38:
@@ -493,14 +501,15 @@ public class Robot implements RobotConstants {
         ;
       }
       x = jj_consume_token(NAME);
-    if (!variables.contains(x.image)) {
+    if (!variables.containsKey(x.image)) {
       if ( isParam ) {
-              if ( !parameters.contains(x.image)) {
+              if ( !parameters.contains(Integer.parseInt(x.image))) {
                 {if (true) throw new Error("The variable " + x.image + " is not defined in the parameters of the function");}
               }
           } else {
         {if (true) throw new Error("The variable " + x.image + " is not defined");}
       }
+     {if (true) return variables.get(x);}
      }
       break;
     default:
@@ -508,6 +517,7 @@ public class Robot implements RobotConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
   }
 
   /** Generated Token Manager. */
