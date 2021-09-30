@@ -195,18 +195,22 @@ void right() throws Error:
 {
   < T_RIGHT > val = numOrVar()
   {
-   if(!(val%360==0)) {   
-   	if(val>360) {
-		while(val>360) {
-			val-=360;
+   if(!(val%360==0)) { 
+   	if (val%90==0) {   
+   		if(val>360) {
+			while(val>360) {
+				val-=360;
+			}
+   		}
+		while(val>0) {  
+			val-=90;		
+			world.turnRight();
 		}
-   	}
-	while(val>0) {  
-		val-=90;		
-		world.turnRight();
-	}
     salida ="comando turnRight";
   }
+  else
+  throw new Error("The value is not a multiple of 90");
+	}
   }
   ("\n"|<EOF>)
 }
@@ -221,7 +225,8 @@ void left() throws Error:
 {
   < T_LEFT > val = numOrVar()
   {
-   if(!(val%360==0)) {   
+   if(!(val%360==0)) {
+    if(val%90==0) {   
    	if(val>360) {
 		while(val>360) {
 			val-=360;
@@ -235,6 +240,9 @@ void left() throws Error:
 	}
     salida ="comando turnLeft";
   }
+  else
+  throw new Error("The value is not a multiple of 90");
+	}
   }
   ("\n"|<EOF>)
   }
@@ -253,7 +261,8 @@ void rotate() throws Error:
     int r = rand.nextInt(2);
 	if(r>=1) {
 		{
-   if(!(val%360==0)) {   
+   if(!(val%360==0)) { 
+    if (val%90==0) {   
    	if(val>360) {
 		while(val>360) {
 			val-=360;
@@ -265,11 +274,15 @@ void rotate() throws Error:
 	}
     salida ="comando turnRight";
   }
+  else
+  throw new Error("The value is not a multiple of 90");
+}
 	}
 	}
    else {
       {
-   if(!(val%360==0)) {   
+   if(!(val%360==0)) {
+    if(val%90==0) {   
    	if(val>360) {
 		while(val>360) {
 			val-=360;
@@ -283,6 +296,9 @@ void rotate() throws Error:
 	}
     salida ="comando turnLeft";
   }
+  else
+  throw new Error("The value is not a multiple of 90");
+}
   }
     }
   }
@@ -448,7 +464,7 @@ void pick() throws Error:
   {
     {
     for(int i=0;val>i;i++)
-    	world.putChip();
+    	world.pickupChip();
     salida = "comando PICK";
   }
   }

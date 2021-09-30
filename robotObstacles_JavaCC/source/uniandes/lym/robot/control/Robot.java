@@ -200,17 +200,21 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_RIGHT);
     val = numOrVar();
    if(!(val%360==0)) {
-        if(val>360) {
-                while(val>360) {
-                        val-=360;
+        if (val%90==0) {
+                if(val>360) {
+                        while(val>360) {
+                                val-=360;
+                        }
                 }
-        }
-        while(val>0) {
-                val-=90;
-                world.turnRight();
-        }
+                while(val>0) {
+                        val-=90;
+                        world.turnRight();
+                }
     salida ="comando turnRight";
   }
+  else
+  {if (true) throw new Error("The value is not a multiple of 90");}
+        }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -233,6 +237,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_LEFT);
     val = numOrVar();
    if(!(val%360==0)) {
+    if(val%90==0) {
         if(val>360) {
                 while(val>360) {
                         val-=360;
@@ -246,6 +251,9 @@ public class Robot implements RobotConstants {
         }
     salida ="comando turnLeft";
   }
+  else
+  {if (true) throw new Error("The value is not a multiple of 90");}
+        }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -272,6 +280,7 @@ public class Robot implements RobotConstants {
         if(r>=1) {
                 {
    if(!(val%360==0)) {
+    if (val%90==0) {
         if(val>360) {
                 while(val>360) {
                         val-=360;
@@ -283,11 +292,15 @@ public class Robot implements RobotConstants {
         }
     salida ="comando turnRight";
   }
+  else
+  {if (true) throw new Error("The value is not a multiple of 90");}
+}
         }
         }
    else {
       {
    if(!(val%360==0)) {
+    if(val%90==0) {
         if(val>360) {
                 while(val>360) {
                         val-=360;
@@ -301,6 +314,9 @@ public class Robot implements RobotConstants {
         }
     salida ="comando turnLeft";
   }
+  else
+  {if (true) throw new Error("The value is not a multiple of 90");}
+}
   }
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -500,7 +516,7 @@ public class Robot implements RobotConstants {
     val = numOrVar();
     {
     for(int i=0;val>i;i++)
-        world.putChip();
+        world.pickupChip();
     salida = "comando PICK";
   }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
