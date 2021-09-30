@@ -159,6 +159,7 @@ void commands() throws Error:
   | function()
   | callFunction()
   | < T_NOP >
+  | "\n"
   )+
 }
 
