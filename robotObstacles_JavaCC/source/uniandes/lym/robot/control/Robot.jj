@@ -45,12 +45,31 @@ public class Robot
   private ArrayList<Integer> funcParam = new ArrayList<Integer>();
   private ArrayList<String> parameters = new ArrayList<String>();
   private String salida = new String();
+  private ArrayList<String> rep = new ArrayList<String>();
+  private boolean isRep = false;
   void setWorld(RobotWorld w)
   {
     world = (RobotWorldDec) w;	
   }
+  void execute(String[] l) {
+	  switch (l[0]) {
+	case "turnRight":
+			world.turnRight();
+		break;
+	case "moveForward":
+		world.moveForward(l[1]);
+	break;
+	case "putChip":
+		world.putChip();
+	break;
+	case "turnRight":
+		world.turnRight();
+	break;
+	default:
+		break;
+	}
 }
-
+}
 PARSER_END(Robot)
 
 SKIP :
@@ -180,7 +199,9 @@ void move() throws Error:
   val = numOrVar()
   {
    world.moveForward(val);
-   //salida ="comando moveForward";
+   salida ="comando moveForward";
+   if(isRep)
+   	 rep.add("moveForward_"+val);
   }
   ("\n"|<EOF>)
 }
@@ -205,6 +226,8 @@ void right() throws Error:
 		while(val>0) {  
 			val-=90;		
 			world.turnRight();
+			if(isRep)
+   	 			rep.add("turnRight");
 		}
     salida ="comando turnRight";
   }
@@ -212,7 +235,7 @@ void right() throws Error:
   throw new Error("The value is not a multiple of 90");
 	}
   }
-  ("\n"|<EOF>)
+  ("\n"|<EOF>)  
 }
 
 /*
@@ -237,6 +260,8 @@ void left() throws Error:
 	while(val>0) {  
 		world.turnRight();
 		val-=90;
+		if(isRep)
+   	 			rep.add("turnRight");
 	}
     salida ="comando turnLeft";
   }
@@ -271,6 +296,8 @@ void rotate() throws Error:
 	while(val>0) {  
 		val-=90;		
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 	}
     salida ="comando turnRight";
   }
@@ -292,6 +319,8 @@ void rotate() throws Error:
 	else if(val==270) val =90;		
 	while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 	}
     salida ="comando turnLeft";
@@ -322,6 +351,8 @@ void look():
         val = 270;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -329,6 +360,8 @@ void look():
         val = 90;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -336,6 +369,8 @@ void look():
         val = 180;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -346,6 +381,8 @@ void look():
         val = 90;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=270;
 		}
       }
@@ -353,6 +390,8 @@ void look():
         val = 270;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -360,6 +399,8 @@ void look():
         val = 180;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -370,6 +411,8 @@ void look():
         val = 90;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -377,6 +420,8 @@ void look():
         val = 180;
 		while(val>0) {
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -384,6 +429,8 @@ void look():
         val = 270;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -394,6 +441,8 @@ void look():
         val = 180;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -401,6 +450,8 @@ void look():
         val = 270;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -408,6 +459,8 @@ void look():
         val = 90;
 		while(val>0) {  
 		world.turnRight();
+		if(isRep)
+   	 			rep.add("turnRight");
 		val-=90;
 		}
       }
@@ -427,8 +480,11 @@ void drop() throws Error:
 {
   < T_DROP > val = numOrVar()
   {
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) { 
     	world.putChip();
+    	if(isRep)
+   	 			rep.add("putChip");
+   	 	}
     salida = "comando DROP";
   }
 }
@@ -444,8 +500,11 @@ void free() throws Error:
   < T_FREE > val = numOrVar()
   {
     {
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) { 
         world.putBalloon();
+		if(isRep)
+   	 			rep.add("putBalloon");
+      }
 	salida = "comando FREE";
   }
   }
@@ -463,8 +522,11 @@ void pick() throws Error:
   < T_PICK > val = numOrVar()
   {
     {
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) { 
     	world.pickupChip();
+    	if(isRep)
+   	 			rep.add("pickupChip");
+   }
     salida = "comando PICK";
   }
   }
@@ -485,6 +547,8 @@ void pop() throws Error:
     {
     for(int i=0;val>i;i++)
     	world.popBalloon();
+    	if(isRep)
+   	 			rep.add("popBalloon");
     salida = "comando POP";
   }
   }
@@ -509,13 +573,17 @@ void check() throws Error:
   {
     if(x.equals("B")) {
 		int aux = world.countBalloons();
+		if(isRep)
+   	 			rep.add("countBalloons_"+aux);
 		if(aux==val)
 			salida = "Hay "+val+" globos\n";
 		else
 			salida = "No hay "+val+" globos\n";
     }
     else {
-		boolean aux = world.chipExists();		
+		boolean aux = world.chipExists();
+				if(isRep)
+   	 			rep.add("chipExists");		
 		if(aux&&val==1)
 			salida = "Hay "+val+" fichas\n";
 		else
@@ -528,11 +596,15 @@ void check() throws Error:
 
 boolean blockedDP():
 {
+  int val = 0;
 }
 {
   <T_BLOCKEDP>
   {
-    boolean x = world.isBlocked(world.getPosition());
+    val = world.getPosition();
+    boolean x = world.isBlocked(val);
+    if(isRep)
+   		rep.add("isBlocked_"+val);		
     salida = (x)?"El robot se encuentra bloqueado":salida;
 	return x;
   }
@@ -547,8 +619,8 @@ void block() :
 }
 {
   "(" < T_BLOCK > ["\n"]
-  commands()["\n"]
-  ")"
+  commands()
+  ")" ("\n"|<EOF>)  
 }
 
 /*
@@ -556,10 +628,21 @@ void block() :
 */
 void repeat() :
 {
+  int val = 0;
+  ArrayList<String> x = new ArrayList<String>();
 }
 {
-  < T_REPEAT > numOrVar() "[" ["\n"]
-  commands()["\n"]
+  < T_REPEAT > val = numOrVar()
+  "[" ["\n"]
+  	
+  {
+   isRep = true;
+  	salida = ""+x;
+	for(int i =0;i<rep.size();i++) {
+		String[] iter = rep.get(i).split("_");
+		}  
+  }
+  ["\n"]
   "]"
 }
 
@@ -611,6 +694,7 @@ void define() throws Error:
 	numero()
 	{
 	variables.put(nombre,Integer.parseInt(token.image));
+	salida = "Se definio correctamente la variable";
 	}
 	("\n"|<EOF>)
 }

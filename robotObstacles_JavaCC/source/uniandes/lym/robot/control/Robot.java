@@ -16,6 +16,8 @@ public class Robot implements RobotConstants {
   private ArrayList<Integer> funcParam = new ArrayList<Integer>();
   private ArrayList<String> parameters = new ArrayList<String>();
   private String salida = new String();
+  private ArrayList<String> rep = new ArrayList<String>();
+  private boolean isRep = false;
   void setWorld(RobotWorld w)
   {
     world = (RobotWorldDec) w;
@@ -176,8 +178,9 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_MOVE);
     val = numOrVar();
    world.moveForward(val);
-   //salida ="comando moveForward";
-
+   salida ="comando moveForward";
+   if(isRep)
+         rep.add("moveForward_"+val);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -209,6 +212,8 @@ public class Robot implements RobotConstants {
                 while(val>0) {
                         val-=90;
                         world.turnRight();
+                        if(isRep)
+                                rep.add("turnRight");
                 }
     salida ="comando turnRight";
   }
@@ -248,6 +253,8 @@ public class Robot implements RobotConstants {
         while(val>0) {
                 world.turnRight();
                 val-=90;
+                if(isRep)
+                                rep.add("turnRight");
         }
     salida ="comando turnLeft";
   }
@@ -289,6 +296,8 @@ public class Robot implements RobotConstants {
         while(val>0) {
                 val-=90;
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
         }
     salida ="comando turnRight";
   }
@@ -310,6 +319,8 @@ public class Robot implements RobotConstants {
         else if(val==270) val =90;
         while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
         }
     salida ="comando turnLeft";
@@ -364,6 +375,8 @@ public class Robot implements RobotConstants {
         val = 270;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -371,6 +384,8 @@ public class Robot implements RobotConstants {
         val = 90;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -378,6 +393,8 @@ public class Robot implements RobotConstants {
         val = 180;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -388,6 +405,8 @@ public class Robot implements RobotConstants {
         val = 90;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=270;
                 }
       }
@@ -395,6 +414,8 @@ public class Robot implements RobotConstants {
         val = 270;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -402,6 +423,8 @@ public class Robot implements RobotConstants {
         val = 180;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -412,6 +435,8 @@ public class Robot implements RobotConstants {
         val = 90;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -419,6 +444,8 @@ public class Robot implements RobotConstants {
         val = 180;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -426,6 +453,8 @@ public class Robot implements RobotConstants {
         val = 270;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -436,6 +465,8 @@ public class Robot implements RobotConstants {
         val = 180;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -443,6 +474,8 @@ public class Robot implements RobotConstants {
         val = 270;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -450,6 +483,8 @@ public class Robot implements RobotConstants {
         val = 90;
                 while(val>0) {
                 world.turnRight();
+                if(isRep)
+                                rep.add("turnRight");
                 val-=90;
                 }
       }
@@ -476,8 +511,11 @@ public class Robot implements RobotConstants {
   int val = 0;
     jj_consume_token(T_DROP);
     val = numOrVar();
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) {
         world.putChip();
+        if(isRep)
+                                rep.add("putChip");
+                }
     salida = "comando DROP";
   }
 
@@ -489,8 +527,11 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_FREE);
     val = numOrVar();
     {
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) {
         world.putBalloon();
+                if(isRep)
+                                rep.add("putBalloon");
+      }
         salida = "comando FREE";
   }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -515,8 +556,11 @@ public class Robot implements RobotConstants {
     jj_consume_token(T_PICK);
     val = numOrVar();
     {
-    for(int i=0;val>i;i++)
+    for(int i=0;val>i;i++) {
         world.pickupChip();
+        if(isRep)
+                                rep.add("pickupChip");
+   }
     salida = "comando PICK";
   }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -543,6 +587,8 @@ public class Robot implements RobotConstants {
     {
     for(int i=0;val>i;i++)
         world.popBalloon();
+        if(isRep)
+                                rep.add("popBalloon");
     salida = "comando POP";
   }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -582,6 +628,8 @@ public class Robot implements RobotConstants {
     val = numOrVar();
     if(x.equals("B")) {
                 int aux = world.countBalloons();
+                if(isRep)
+                                rep.add("countBalloons_"+aux);
                 if(aux==val)
                         salida = "Hay "+val+" globos\u005cn";
                 else
@@ -589,6 +637,8 @@ public class Robot implements RobotConstants {
     }
     else {
                 boolean aux = world.chipExists();
+                                if(isRep)
+                                rep.add("chipExists");
                 if(aux&&val==1)
                         salida = "Hay "+val+" fichas\u005cn";
                 else
@@ -610,8 +660,12 @@ public class Robot implements RobotConstants {
   }
 
   final public boolean blockedDP() throws ParseException {
+  int val = 0;
     jj_consume_token(T_BLOCKEDP);
-    boolean x = world.isBlocked(world.getPosition());
+    val = world.getPosition();
+    boolean x = world.isBlocked(val);
+    if(isRep)
+                rep.add("isBlocked_"+val);
     salida = (x)?"El robot se encuentra bloqueado":salida;
         {if (true) return x;}
     throw new Error("Missing return statement in function");
@@ -632,23 +686,29 @@ public class Robot implements RobotConstants {
       ;
     }
     commands();
+    jj_consume_token(34);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
       break;
+    case 0:
+      jj_consume_token(0);
+      break;
     default:
       jj_la1[15] = jj_gen;
-      ;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
-    jj_consume_token(34);
   }
 
 /*
 /Metodo que define la funcion Repeat
 */
   final public void repeat() throws ParseException {
+  int val = 0;
+  ArrayList<String> x = new ArrayList<String>();
     jj_consume_token(T_REPEAT);
-    numOrVar();
+    val = numOrVar();
     jj_consume_token(35);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
@@ -658,7 +718,17 @@ public class Robot implements RobotConstants {
       jj_la1[16] = jj_gen;
       ;
     }
-    commands();
+   isRep = true;
+        salida = ""+x;
+        for(int i =0;i<rep.size();i++) {
+                String[] iter = rep.get(i).split("_");
+                if(iter.lenght()>1) {
+                        invoke(RobotWorldDec.Class.getMethod(iter[0],"int."+iter[1]));
+                }
+                else {
+                        invoke(RobotWorldDec.Class.getMethod(iter[0]));
+                }
+        }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -732,6 +802,7 @@ public class Robot implements RobotConstants {
           }
     numero();
         variables.put(nombre,Integer.parseInt(token.image));
+        salida = "Se definio correctamente la variable";
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -886,7 +957,7 @@ public class Robot implements RobotConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x801ebff0,0x801ebff0,0x801ebff0,0x1,0x1,0x1,0x1,0x1e000000,0x1,0x1,0x1,0x1,0x1800000,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0xa0000000,0x0,0xa0000000,};
+      jj_la1_0 = new int[] {0x801ebff0,0x801ebff0,0x801ebff0,0x1,0x1,0x1,0x1,0x1e000000,0x1,0x1,0x1,0x1,0x1800000,0x1,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0xa0000000,0x0,0xa0000000,};
    }
    private static void jj_la1_init_1() {
       jj_la1_1 = new int[] {0x2,0x2,0x2,0x1,0x1,0x1,0x1,0x0,0x1,0x1,0x1,0x1,0x0,0x1,0x1,0x1,0x1,0x1,0x20,0x1,0x1,0x1,0x40,0x40,0x40,0x40,};
