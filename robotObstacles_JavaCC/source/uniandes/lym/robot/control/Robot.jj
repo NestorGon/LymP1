@@ -35,6 +35,7 @@ import java.util.Vector;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 @ SuppressWarnings("serial") 
 public class Robot
 {
@@ -87,10 +88,10 @@ TOKEN :
 {
   < T_BALLOONS : "B" >
 | 	< T_CHIPS : "C" >
-| 	< T_NORTH : "NORTH" >
-| 	< T_EAST : "EAST" >
-| 	< T_WEST : "WEST" >
-| 	< T_SOUTH : "SOUTH" >
+| 	< T_NORTH : "N" >
+| 	< T_EAST : "E" >
+| 	< T_WEST : "W" >
+| 	< T_SOUTH : "S" >
 }
 
 TOKEN :
@@ -139,7 +140,6 @@ void commands() throws Error:
   | function()
   | callFunction()
   | < T_NOP >
-  | "\n"
   )+
 }
 
@@ -180,9 +180,9 @@ void move() throws Error:
   val = numOrVar()
   {
    world.moveForward(val);
-   salida ="comando moveForward";
+   //salida ="comando moveForward";
   }
-  "\n"
+  ("\n"|<EOF>)
 }
 
 /*
@@ -193,11 +193,22 @@ void right() throws Error:
   int val = 0;
 }
 {
-  < T_RIGHT > numOrVar()
+  < T_RIGHT > val = numOrVar()
   {
-   world.turnRight();
-   salida ="comando turnRight";
+   if(!(val%360==0)) {   
+   	if(val>360) {
+		while(val>360) {
+			val-=360;
+		}
+   	}
+	while(val>0) {  
+		val-=90;		
+		world.turnRight();
+	}
+    salida ="comando turnRight";
   }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -205,19 +216,77 @@ void right() throws Error:
 */
 void left() throws Error:
 {
+   int val = 0;
 }
 {
-  < T_LEFT > numOrVar()
-}
+  < T_LEFT > val = numOrVar()
+  {
+   if(!(val%360==0)) {   
+   	if(val>360) {
+		while(val>360) {
+			val-=360;
+		}
+   	}
+	if(val==90) val = 270;
+	else if(val==270) val =90;		
+	while(val>0) {  
+		world.turnRight();
+		val-=90;
+	}
+    salida ="comando turnLeft";
+  }
+  }
+  ("\n"|<EOF>)
+  }
 
 /*
 /Metodo que define la funcion Rotate
 */
 void rotate() throws Error:
 {
+  int val = 0;
 }
 {
-  < T_ROTATE > numOrVar() 
+  < T_ROTATE > val = numOrVar()
+  {
+    Random rand = new Random();
+    int r = rand.nextInt(2);
+	if(r>=1) {
+		{
+   if(!(val%360==0)) {   
+   	if(val>360) {
+		while(val>360) {
+			val-=360;
+		}
+   	}
+	while(val>0) {  
+		val-=90;		
+		world.turnRight();
+	}
+    salida ="comando turnRight";
+  }
+	}
+	}
+   else {
+      {
+   if(!(val%360==0)) {   
+   	if(val>360) {
+		while(val>360) {
+			val-=360;
+		}
+   	}
+	if(val==90) val = 270;
+	else if(val==270) val =90;		
+	while(val>0) {  
+		world.turnRight();
+		val-=90;
+	}
+    salida ="comando turnLeft";
+  }
+  }
+    }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -225,9 +294,111 @@ void rotate() throws Error:
 */
 void look():
 {
+  String x;
+  int val = 0;
 }
 {
   < T_LOOK > ( < T_NORTH > | < T_EAST > | < T_WEST > | < T_SOUTH > )
+  {
+    x = token.image;
+    if(x.equals("N")){
+      if(world.facingEast()) {
+        val = 270;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingWest()) {
+        val = 90;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingSouth()) {
+        val = 180;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      salida = "Se esta mirando al norte";
+    }
+    else if(x.equals("S")){
+      if(world.facingEast()) {
+        val = 90;
+		while(val>0) {  
+		world.turnRight();
+		val-=270;
+		}
+      }
+      else if(world.facingWest()) {
+        val = 270;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingNorth()) {
+        val = 180;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      salida = "Se esta mirando al sur";
+    }
+    else if(x.equals("E")){
+      if(world.facingNorth()) {
+        val = 90;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingWest()) {
+        val = 180;
+		while(val>0) {
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingSouth()) {
+        val = 270;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      salida = "Se esta mirando al este";
+    }
+    else if(x.equals("W")){
+      if(world.facingEast()) {
+        val = 180;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingNorth()) {
+        val = 270;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      else if(world.facingSouth()) {
+        val = 90;
+		while(val>0) {  
+		world.turnRight();
+		val-=90;
+		}
+      }
+      salida = "Se esta mirando al oeste(west)";
+    }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -235,9 +406,15 @@ void look():
 */
 void drop() throws Error:
 {
+  int val = 0;
 }
 {
-  < T_DROP > numOrVar()
+  < T_DROP > val = numOrVar()
+  {
+    for(int i=0;val>i;i++)
+    	world.putChip();
+    salida = "comando DROP";
+  }
 }
 
 /*
@@ -245,9 +422,18 @@ void drop() throws Error:
 */
 void free() throws Error:
 {
+  int val = 0;
 }
 {
-  < T_FREE > numOrVar()
+  < T_FREE > val = numOrVar()
+  {
+    {
+    for(int i=0;val>i;i++)
+        world.putBalloon();
+	salida = "comando FREE";
+  }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -255,9 +441,18 @@ void free() throws Error:
 */
 void pick() throws Error:
 {
+ int val = 0; 
 }
 {
-  < T_PICK > numOrVar()
+  < T_PICK > val = numOrVar()
+  {
+    {
+    for(int i=0;val>i;i++)
+    	world.putChip();
+    salida = "comando PICK";
+  }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -266,9 +461,18 @@ void pick() throws Error:
 
 void pop() throws Error:
 {
+  int val = 0;
 }
 {
-  < T_POP > numOrVar()
+  < T_POP > val = numOrVar()
+  {
+    {
+    for(int i=0;val>i;i++)
+    	world.popBalloon();
+    salida = "comando POP";
+  }
+  }
+  ("\n"|<EOF>)
 }
 
 /*
@@ -277,9 +481,45 @@ void pop() throws Error:
 
 void check() throws Error:
 {
+	int val = 0;
+	String x  = "";
 }
 {
-  < T_CHECK > ( < T_CHIPS > | < T_BALLOONS > ) numOrVar()
+  < T_CHECK > ( < T_CHIPS > | < T_BALLOONS > )
+  {
+  x = token.image; 
+  }
+  val = numOrVar()
+  {
+    if(x.equals("B")) {
+		int aux = world.countBalloons();
+		if(aux==val)
+			salida = "Hay "+val+" globos\n";
+		else
+			salida = "No hay "+val+" globos\n";
+    }
+    else {
+		boolean aux = world.chipExists();		
+		if(aux&&val==1)
+			salida = "Hay "+val+" fichas\n";
+		else
+			salida = "No hay "+val+" fichas\n";
+			
+    }
+  }
+  ("\n"|<EOF>)  
+}
+
+boolean blockedDP():
+{
+}
+{
+  <T_BLOCKEDP>
+  {
+    boolean x = world.isBlocked(world.getPosition());
+    salida = (x)?"El robot se encuentra bloqueado":salida;
+	return x;
+  }
 }
 
 
@@ -310,11 +550,25 @@ void repeat() :
 /*
 /Metodo que define la funcion IF (cambie el nombre porque estaba sobreescribiendo el metodo if como tal)
 */
-void ifs() :
+void ifs() throws Error :
 {
+  boolean val = false;
+  String neg = "";
 }
 {
-  < T_IF > ("!")* < T_BLOCKEDP > "[" ["\n"]
+  < T_IF > ("!")*
+  {
+  neg = token.image;
+	}
+  val = blockedDP()
+  "[" ["\n"]
+  {
+   for(int i=0;neg.length()>i;i++)
+   	 val = !(val);
+   if(val==false) 
+     salida = ""+val;
+// throw new Error("La condicion es negativa");
+   }
   commands()["\n"]
   "]"
 }
