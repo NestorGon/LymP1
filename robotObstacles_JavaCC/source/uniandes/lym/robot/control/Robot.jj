@@ -612,8 +612,7 @@ void define() throws Error:
 	{
 	variables.put(nombre,Integer.parseInt(token.image));
 	}
-	"\n"
-  
+	("\n"|<EOF>)
 }
  
 /*
@@ -702,14 +701,14 @@ int numOrVar() throws Error:
   	(x=<NAME> {      
     if (!variables.containsKey(x.image)) {
       if ( isParam ) { 
-	      if ( !parameters.contains(Integer.parseInt(x.image))) {
+	      if ( !parameters.contains(x.image)) {
 	        throw new Error("The variable " + x.image + " is not defined in the parameters of the function");
 	      }
 	  } else { 
       	throw new Error("The variable " + x.image + " is not defined");
       }
-     return variables.get(x);
      }
+     return variables.get(x.image);
    }))
 }
 
