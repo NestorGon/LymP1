@@ -47,6 +47,7 @@ public class Robot
   private String salida = new String();
   private ArrayList<String> rep = new ArrayList<String>();
   private boolean isRep = false;
+  private boolean noExec = false;
   void setWorld(RobotWorld w)
   {
     world = (RobotWorldDec) w;	
@@ -57,13 +58,30 @@ public class Robot
 			world.turnRight();
 		break;
 	case "moveForward":
-		world.moveForward(l[1]);
+		world.moveForward(Integer.parseInt(l[1]));
 	break;
 	case "putChip":
 		world.putChip();
 	break;
-	case "turnRight":
-		world.turnRight();
+	case "putBalloon":
+		world.putBalloon();
+	break;
+	case "pickupChip":
+		world.pickupChip();
+	break;
+	case "popBalloon":
+		world.popBalloon();
+	break;
+	case "countBalloons":
+		world.countBalloons();
+	break;
+	case "chipExists":
+		world.chipExists();
+	break;
+		case "isBLocked":
+		String x = l[1].split("\\.")[0];
+		String y = l[2].split("\\.")[0];
+		world.chipExists(new Point(Integer.parseInt(x),Integer.parseInt(y)));
 	break;
 	default:
 		break;
@@ -199,10 +217,12 @@ void move() throws Error:
   < T_MOVE >
   val = numOrVar()
   {
+    if(!noExec) { 
    world.moveForward(val);
    salida ="comando moveForward";
    if(isRep)
    	 rep.add("moveForward_"+val);
+   }
   }
   ("\n"|<EOF>)
 }
@@ -217,6 +237,7 @@ void right() throws Error:
 {
   < T_RIGHT > val = numOrVar()
   {
+    if(!noExec) {
    if(!(val%360==0)) { 
    	if (val%90==0) {   
    		if(val>360) {
@@ -236,6 +257,7 @@ void right() throws Error:
   throw new Error("The value is not a multiple of 90");
 	}
   }
+}
   ("\n"|<EOF>)  
 }
 
@@ -249,6 +271,7 @@ void left() throws Error:
 {
   < T_LEFT > val = numOrVar()
   {
+    if(!noExec) {
    if(!(val%360==0)) {
     if(val%90==0) {   
    	if(val>360) {
@@ -270,6 +293,7 @@ void left() throws Error:
   throw new Error("The value is not a multiple of 90");
 	}
   }
+}
   ("\n"|<EOF>)
   }
 
@@ -283,6 +307,7 @@ void rotate() throws Error:
 {
   < T_ROTATE > val = numOrVar()
   {
+  if(!noExec) {
     Random rand = new Random();
     int r = rand.nextInt(2);
 	if(r>=1) {
@@ -332,6 +357,7 @@ void rotate() throws Error:
   }
     }
   }
+}
   ("\n"|<EOF>)
 }
 
@@ -346,6 +372,7 @@ void look():
 {
   < T_LOOK > ( < T_NORTH > | < T_EAST > | < T_WEST > | < T_SOUTH > )
   {
+    if(!noExec) {
     x = token.image;
     if(x.equals("N")){
       if(world.facingEast()) {
@@ -468,6 +495,7 @@ void look():
       salida = "Se esta mirando al oeste(west)";
     }
   }
+}
   ("\n"|<EOF>)
 }
 
@@ -481,6 +509,7 @@ void drop() throws Error:
 {
   < T_DROP > val = numOrVar()
   {
+    if(!noExec) {
     for(int i=0;val>i;i++) { 
     	world.putChip();
     	if(isRep)
@@ -488,6 +517,7 @@ void drop() throws Error:
    	 	}
     salida = "comando DROP";
   }
+}
 }
 
 /*
@@ -500,7 +530,8 @@ void free() throws Error:
 {
   < T_FREE > val = numOrVar()
   {
-    {
+    
+      if(!noExec) { 
     for(int i=0;val>i;i++) { 
         world.putBalloon();
 		if(isRep)
@@ -508,7 +539,8 @@ void free() throws Error:
       }
 	salida = "comando FREE";
   }
-  }
+  
+}
   ("\n"|<EOF>)
 }
 
@@ -522,6 +554,7 @@ void pick() throws Error:
 {
   < T_PICK > val = numOrVar()
   {
+    if(!noExec) {
     {
     for(int i=0;val>i;i++) { 
     	world.pickupChip();
@@ -531,6 +564,7 @@ void pick() throws Error:
     salida = "comando PICK";
   }
   }
+}
   ("\n"|<EOF>)
 }
 
@@ -545,6 +579,7 @@ void pop() throws Error:
 {
   < T_POP > val = numOrVar()
   {
+    if(!noExec) {
     {
     for(int i=0;val>i;i++)
     	world.popBalloon();
@@ -553,6 +588,7 @@ void pop() throws Error:
     salida = "comando POP";
   }
   }
+}
   ("\n"|<EOF>)
 }
 
@@ -572,10 +608,11 @@ void check() throws Error:
   }
   val = numOrVar()
   {
+    if(!noExec) {
     if(x.equals("B")) {
 		int aux = world.countBalloons();
 		if(isRep)
-   	 			rep.add("countBalloons_"+aux);
+   	 			rep.add("countBalloons");
 		if(aux==val)
 			salida = "Hay "+val+" globos\n";
 		else
@@ -592,23 +629,43 @@ void check() throws Error:
 			
     }
   }
+}
   ("\n"|<EOF>)  
 }
 
 boolean blockedDP():
 {
-  int val = 0;
+  Point val;
 }
 {
   <T_BLOCKEDP>
-  {
+  {if(!noExec) {
     val = world.getPosition();
-    boolean x = world.isBlocked(val);
-    if(isRep)
-   		rep.add("isBlocked_"+val);		
-    salida = (x)?"El robot se encuentra bloqueado":salida;
-	return x;
-  }
+	int x = (int)val.getX();
+	int y = (int)val.getY(); 
+   	switch (world.getFacing()) {
+	case 0:
+		x+=1;
+		break;
+	case 1:
+		x-=1;
+		break;
+	case 2:
+		y+=1;
+		break;
+	case 3:
+		y-=1;
+		break;
+	default:
+		break;
+	}
+	val = new Point(x,y);
+    boolean z = world.isBlocked(val);
+    if(isRep) 
+   		rep.add("isBlocked_"+val.getX()+"_"+val.getY());
+    salida = (z)?"El robot se encuentra bloqueado":salida;
+	return z;
+  } }
 }
 
 
@@ -630,7 +687,6 @@ void block() :
 void repeat() :
 {
   int val = 0;
-  ArrayList<String> x = new ArrayList<String>();
 }
 {
   < T_REPEAT > val = numOrVar()
@@ -638,13 +694,22 @@ void repeat() :
   	
   {
    isRep = true;
-  	salida = ""+x;
+  	salida = "funciona";
+ }
+  	commands()
+	{
+	 for(int j =1; j<val;j++) { 
 	for(int i =0;i<rep.size();i++) {
 		String[] iter = rep.get(i).split("_");
-		}  
+		execute(iter);
+		}
+	}
+	isRep = false;
+	rep.clear();  
   }
   ["\n"]
   "]"
+  ("\n"|<EOF>)
 }
 
 /*
@@ -653,25 +718,27 @@ void repeat() :
 void ifs() throws Error :
 {
   boolean val = false;
-  String neg = "";
+  int neg = 0;
 }
 {
-  < T_IF > ("!")*
-  {
-  neg = token.image;
-	}
+  < T_IF > ("!" {neg++;})*
   val = blockedDP()
-  "[" ["\n"]
+  "[" ["\n"]     	
   {
-   for(int i=0;neg.length()>i;i++)
+     for(int i=0;neg>i;i++)  
    	 val = !(val);
-   if(val==false) 
-     salida = ""+val;
-// throw new Error("La condicion es negativa");
-   }
-  commands()["\n"]
-  "]"
-}
+   	 if(val==false)   
+		  noExec = true;  
+ }			
+  	 commands()
+  	 {noExec = false;
+  	 salida = ""+val;}
+   "]"
+   ["\n"]
+  }
+  
+  
+
 
 /*
 /Metodo que define la funcion DEFINE
