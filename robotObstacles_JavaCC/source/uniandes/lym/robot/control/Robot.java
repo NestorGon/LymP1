@@ -13,10 +13,11 @@ public class Robot implements RobotConstants {
   private RobotWorldDec world;
   private HashMap<String,Integer> variables = new HashMap<String,Integer>();
   private ArrayList<String> functions = new ArrayList<String>();
-  private ArrayList<Integer> funcParam = new ArrayList<Integer>();
-  private ArrayList<String> parameters = new ArrayList<String>();
+  private ArrayList<HashMap<String,Integer>> funcParam = new ArrayList<HashMap<String,Integer>>();
+  private ArrayList<String> parameters = null;
   private String salida = new String();
   private ArrayList<String> rep = new ArrayList<String>();
+  private HashMap<String,ArrayList<String>> functionDefine = new HashMap<String,ArrayList<String>>();
   private boolean isRep = false;
   private boolean noExec = false;
   void setWorld(RobotWorld w)
@@ -216,14 +217,21 @@ public class Robot implements RobotConstants {
 */
   final public void move() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_MOVE);
     val = numOrVar();
-    if(!noExec) {
-   world.moveForward(val);
-   salida ="comando moveForward";
-   if(isRep)
-         rep.add("moveForward_"+val);
-   }
+    if (!noExec)
+    {
+      world.moveForward(val);
+      salida = "comando moveForward";
+      if (isRep)
+        rep.add("moveForward_" + val);
+    }
+    if (func)
+    {
+      ArrayList<String> found = functionDefine.get(functions.get(functions.size() - 1));
+      found.add("moveForward_" + val);
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -243,28 +251,38 @@ public class Robot implements RobotConstants {
 */
   final public void right() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_RIGHT);
     val = numOrVar();
-    if(!noExec) {
-   if(!(val%360==0)) {
-        if (val%90==0) {
-                if(val>360) {
-                        while(val>360) {
-                                val-=360;
-                        }
-                }
-                while(val>0) {
-                        val-=90;
-                        world.turnRight();
-                        if(isRep)
-                                rep.add("turnRight");
-                }
-    salida ="comando turnRight";
-  }
-  else
-  {if (true) throw new Error("The value is not a multiple of 90");}
+    if (!(val % 360 == 0))
+    {
+      if (val % 90 == 0)
+      {
+        if (val > 360)
+        {
+          while (val > 360)
+          {
+            val -= 360;
+          }
         }
-  }
+        while (val > 0)
+        {
+          val -= 90;
+          if (!noExec)
+                world.turnRight();
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+        }
+        salida = "comando turnRight";
+      }
+      else
+        {if (true) throw new Error("The value is not a multiple of 90");}
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -284,30 +302,40 @@ public class Robot implements RobotConstants {
 */
   final public void left() throws ParseException, Error {
    int val = 0;
+   boolean func = parameters!=null;
     jj_consume_token(T_LEFT);
     val = numOrVar();
-    if(!noExec) {
-   if(!(val%360==0)) {
-    if(val%90==0) {
-        if(val>360) {
-                while(val>360) {
-                        val-=360;
-                }
+    if (!(val % 360 == 0))
+    {
+      if (val % 90 == 0)
+      {
+        if (val > 360)
+        {
+          while (val > 360)
+          {
+            val -= 360;
+          }
         }
-        if(val==90) val = 270;
-        else if(val==270) val =90;
-        while(val>0) {
+        if (val == 90) val = 270;
+        else if (val == 270) val = 90;
+        while (val > 0)
+        {
+          val -= 90;
+          if (!noExec)
                 world.turnRight();
-                val-=90;
-                if(isRep)
-                                rep.add("turnRight");
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
         }
-    salida ="comando turnLeft";
-  }
-  else
-  {if (true) throw new Error("The value is not a multiple of 90");}
-        }
-  }
+        salida = "comando turnLeft";
+      }
+      else
+        {if (true) throw new Error("The value is not a multiple of 90");}
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -327,58 +355,81 @@ public class Robot implements RobotConstants {
 */
   final public void rotate() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_ROTATE);
     val = numOrVar();
-  if(!noExec) {
     Random rand = new Random();
     int r = rand.nextInt(2);
-        if(r>=1) {
-                {
-   if(!(val%360==0)) {
-    if (val%90==0) {
-        if(val>360) {
-                while(val>360) {
-                        val-=360;
-                }
-        }
-        while(val>0) {
-                val-=90;
-                world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-        }
-    salida ="comando turnRight";
-  }
-  else
-  {if (true) throw new Error("The value is not a multiple of 90");}
-}
-        }
-        }
-   else {
+    if (r >= 1)
+    {
       {
-   if(!(val%360==0)) {
-    if(val%90==0) {
-        if(val>360) {
-                while(val>360) {
-                        val-=360;
-                }
-        }
-        if(val==90) val = 270;
-        else if(val==270) val =90;
-        while(val>0) {
+        if (!(val % 360 == 0))
+        {
+          if (val % 90 == 0)
+          {
+            if (val > 360)
+            {
+              while (val > 360)
+              {
+                val -= 360;
+              }
+            }
+            while (val > 0)
+            {
+              val -= 90;
+              if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
+              if (isRep)
+                rep.add("turnRight");
+              if (func)
+              {
+                ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+                found.add("turnRight");
+              }
+            }
+            salida = "comando turnRight";
+          }
+          else
+                {if (true) throw new Error("The value is not a multiple of 90");}
         }
-    salida ="comando turnLeft";
-  }
-  else
-  {if (true) throw new Error("The value is not a multiple of 90");}
-}
-  }
+      }
     }
-  }
+    else
+    {
+      {
+        if (!(val % 360 == 0))
+        {
+          if (val % 90 == 0)
+          {
+            if (val > 360)
+            {
+              while (val > 360)
+              {
+                val -= 360;
+              }
+            }
+            if (val == 90) val = 270;
+            else if (val == 270) val = 90;
+            while (val > 0)
+            {
+              if (!noExec)
+                world.turnRight();
+              if (isRep)
+                rep.add("turnRight");
+              if (func)
+              {
+                ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+                found.add("turnRight");
+              }
+              val -= 90;
+            }
+            salida = "comando turnLeft";
+          }
+          else
+                {if (true) throw new Error("The value is not a multiple of 90");}
+        }
+      }
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -399,6 +450,7 @@ public class Robot implements RobotConstants {
   final public void look() throws ParseException {
   String x;
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_LOOK);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case T_NORTH:
@@ -418,129 +470,227 @@ public class Robot implements RobotConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
-    if(!noExec) {
     x = token.image;
-    if(x.equals("N")){
-      if(world.facingEast()) {
+    if (x.equals("N"))
+    {
+      if (world.facingEast())
+      {
         val = 270;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingWest()) {
+      else if (world.facingWest())
+      {
         val = 90;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingSouth()) {
+      else if (world.facingSouth())
+      {
         val = 180;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
       salida = "Se esta mirando al norte";
     }
-    else if(x.equals("S")){
-      if(world.facingEast()) {
+    else if (x.equals("S"))
+    {
+      if (world.facingEast())
+      {
         val = 90;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=270;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 270;
+        }
       }
-      else if(world.facingWest()) {
+      else if (world.facingWest())
+      {
         val = 270;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingNorth()) {
+      else if (world.facingNorth())
+      {
         val = 180;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
       salida = "Se esta mirando al sur";
     }
-    else if(x.equals("E")){
-      if(world.facingNorth()) {
+    else if (x.equals("E"))
+    {
+      if (world.facingNorth())
+      {
         val = 90;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingWest()) {
+      else if (world.facingWest())
+      {
         val = 180;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingSouth()) {
+      else if (world.facingSouth())
+      {
         val = 270;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
       salida = "Se esta mirando al este";
     }
-    else if(x.equals("W")){
-      if(world.facingEast()) {
+    else if (x.equals("W"))
+    {
+      if (world.facingEast())
+      {
         val = 180;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingNorth()) {
+      else if (world.facingNorth())
+      {
         val = 270;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
-      else if(world.facingSouth()) {
+      else if (world.facingSouth())
+      {
         val = 90;
-                while(val>0) {
+        while (val > 0)
+        {
+          if (!noExec)
                 world.turnRight();
-                if(isRep)
-                                rep.add("turnRight");
-                val-=90;
-                }
+          if (isRep)
+                rep.add("turnRight");
+          if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("turnRight");
+          }
+          val -= 90;
+        }
       }
       salida = "Se esta mirando al oeste(west)";
     }
-  }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -560,16 +710,22 @@ public class Robot implements RobotConstants {
 */
   final public void drop() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_DROP);
     val = numOrVar();
-    if(!noExec) {
-    for(int i=0;val>i;i++) {
+    for (int i = 0; val > i; i++)
+    {
+      if (!noExec)
         world.putChip();
-        if(isRep)
-                                rep.add("putChip");
-                }
+      if (isRep)
+        rep.add("putChip");
+      if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("putChip");
+          }
+    }
     salida = "comando DROP";
-  }
   }
 
 /*
@@ -577,16 +733,22 @@ public class Robot implements RobotConstants {
 */
   final public void free() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_FREE);
     val = numOrVar();
-      if(!noExec) {
-    for(int i=0;val>i;i++) {
+    for (int i = 0; val > i; i++)
+    {
+      if (!noExec)
         world.putBalloon();
-                if(isRep)
-                                rep.add("putBalloon");
-      }
-        salida = "comando FREE";
-  }
+      if (isRep)
+        rep.add("putBalloon");
+      if (func)
+          {
+            ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+            found.add("putBalloon");
+          }
+    }
+    salida = "comando FREE";
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -606,18 +768,24 @@ public class Robot implements RobotConstants {
 */
   final public void pick() throws ParseException, Error {
  int val = 0;
+ boolean func = parameters!=null;
     jj_consume_token(T_PICK);
     val = numOrVar();
-    if(!noExec) {
     {
-    for(int i=0;val>i;i++) {
-        world.pickupChip();
-        if(isRep)
-                                rep.add("pickupChip");
-   }
-    salida = "comando PICK";
-  }
-  }
+      for (int i = 0; val > i; i++)
+      {
+        if (!noExec)
+                world.pickupChip();
+        if (isRep)
+                rep.add("pickupChip");
+        if (func)
+        {
+          ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+          found.add("pickupChip");
+        }
+      }
+      salida = "comando PICK";
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -637,17 +805,22 @@ public class Robot implements RobotConstants {
 */
   final public void pop() throws ParseException, Error {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_POP);
     val = numOrVar();
-    if(!noExec) {
     {
-    for(int i=0;val>i;i++)
+      for (int i = 0; val > i; i++)
+      if (!noExec)
         world.popBalloon();
-        if(isRep)
-                                rep.add("popBalloon");
-    salida = "comando POP";
-  }
-  }
+      if (isRep)
+        rep.add("popBalloon");
+      if (func)
+      {
+        ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+        found.add("popBalloon");
+      }
+      salida = "comando POP";
+    }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -668,6 +841,7 @@ public class Robot implements RobotConstants {
   final public void check() throws ParseException, Error {
         int val = 0;
         String x  = "";
+        boolean func = parameters!=null;
     jj_consume_token(T_CHECK);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case T_CHIPS:
@@ -681,29 +855,40 @@ public class Robot implements RobotConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
-  x = token.image;
+    x = token.image;
     val = numOrVar();
-    if(!noExec) {
-    if(x.equals("B")) {
-                int aux = world.countBalloons();
-                if(isRep)
-                                rep.add("countBalloons");
-                if(aux==val)
-                        salida = "Hay "+val+" globos\u005cn";
-                else
-                        salida = "No hay "+val+" globos\u005cn";
+    if (x.equals("B"))
+    {
+      int aux = world.countBalloons();
+      if (isRep)
+        rep.add("countBalloons");
+      if (func)
+      {
+        ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+        found.add("countBalloons");
+      }
+      if (aux == val)
+        salida = "Hay " + val + " globos\u005cn";
+      else
+        salida = "No hay " + val + " globos\u005cn";
     }
-    else {
-                boolean aux = world.chipExists();
-                                if(isRep)
-                                rep.add("chipExists");
-                if(aux&&val==1)
-                        salida = "Hay "+val+" fichas\u005cn";
-                else
-                        salida = "No hay "+val+" fichas\u005cn";
-
+    else
+    {
+      boolean aux = world.chipExists();
+      if (isRep)
+        rep.add("chipExists");
+      if (func)
+      {
+        ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+        found.add("chipExists");
+      }
+      if (aux && val == 1)
+        salida = "Hay " + val + " fichas\u005cn";
+      else
+        salida = "No hay " + val + " fichas\u005cn";
     }
-  }
+    if (noExec)
+        salida = "\u005cn";
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -720,34 +905,41 @@ public class Robot implements RobotConstants {
 
   final public boolean blockedDP() throws ParseException {
   Point val;
+  boolean func = parameters!=null;
     jj_consume_token(T_BLOCKEDP);
-   if(!noExec) {
     val = world.getPosition();
-        int x = (int)val.getX();
-        int y = (int)val.getY();
-        switch (world.getFacing()) {
-        case 0:
-                x+=1;
-                break;
-        case 1:
-                x-=1;
-                break;
-        case 2:
-                y+=1;
-                break;
-        case 3:
-                y-=1;
-                break;
-        default:
-                break;
-        }
-        val = new Point(x,y);
+    int x = (int) val.getX();
+    int y = (int) val.getY();
+    switch (world.getFacing())
+    {
+      case 0 :
+      x += 1;
+      break;
+      case 1 :
+      x -= 1;
+      break;
+      case 2 :
+      y += 1;
+      break;
+      case 3 :
+      y -= 1;
+      break;
+      default :
+      break;
+    }
+    val = new Point(x, y);
     boolean z = world.isBlocked(val);
-    if(isRep)
-                rep.add("isBlocked_"+val.getX()+"_"+val.getY());
-    salida = (z)?"El robot se encuentra bloqueado":salida;
-        {if (true) return z;}
-  }
+    if (isRep)
+        rep.add("isBlocked_" + val.getX() + "_" + val.getY());
+    if (func)
+    {
+      ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+      found.add("isBlocked_" + val.getX() + "_" + val.getY());
+    }
+    salida = (z) ? "El robot se encuentra bloqueado" : salida;
+    if (noExec)
+        salida = "";
+    {if (true) return z;}
     throw new Error("Missing return statement in function");
   }
 
@@ -786,6 +978,7 @@ public class Robot implements RobotConstants {
 */
   final public void repeat() throws ParseException {
   int val = 0;
+  boolean func = parameters!=null;
     jj_consume_token(T_REPEAT);
     val = numOrVar();
     jj_consume_token(35);
@@ -797,17 +990,24 @@ public class Robot implements RobotConstants {
       jj_la1[16] = jj_gen;
       ;
     }
-   isRep = true;
-        salida = "funciona";
+    isRep = true;
+    salida = "funciona";
     commands();
-         for(int j =1; j<val;j++) {
-        for(int i =0;i<rep.size();i++) {
-                String[] iter = rep.get(i).split("_");
-                execute(iter);
-                }
-        }
-        isRep = false;
-        rep.clear();
+    for (int j = 1; j < val; j++)
+    {
+      for (int i = 0; i < rep.size(); i++)
+      {
+        if (func)
+    {
+      ArrayList < String > found = functionDefine.get(functions.get(functions.size() - 1));
+      found.add(rep.get(i));
+    }
+        String [ ] iter = rep.get(i).split("_");
+        execute(iter);
+      }
+    }
+    isRep = false;
+    rep.clear();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -885,15 +1085,19 @@ public class Robot implements RobotConstants {
 */
   final public void define() throws ParseException, Error {
   String nombre = "";
+  boolean func = parameters!=null;
+    if (func)
+        {if (true) throw new Error("Can't define variable inside a TO instruction");}
     jj_consume_token(T_DEFINE);
     jj_consume_token(NAME);
-          nombre = token.image;
-          if(variables.containsKey(nombre)) {
-                {if (true) throw new Error("The variable is already defined");}
-          }
+    nombre = token.image;
+    if (variables.containsKey(nombre))
+    {
+      {if (true) throw new Error("The variable is already defined");}
+    }
     numero();
-        variables.put(nombre,Integer.parseInt(token.image));
-        salida = "Se definio correctamente la variable";
+    variables.put(nombre, Integer.parseInt(token.image));
+    salida = "Se definio correctamente la variable";
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 32:
       jj_consume_token(32);
@@ -913,16 +1117,23 @@ public class Robot implements RobotConstants {
 */
   final public void function() throws ParseException, Error {
   Token x;
+  Token y;
   int numParams = 0;
-  boolean func = parameters.size()>0;
-    if ( func )
+  boolean func = parameters!=null;
+    if ( func ) {
+      parameters = null;
         {if (true) throw new Error("Can't create a function inside another function");}
+   }
+    noExec = true;
+    parameters = new ArrayList<String>();
     jj_consume_token(T_TO);
     x = jj_consume_token(NAME);
     //Revisar si ya se declaro anteriormente esta variable
         if(variables.containsKey(x)||functions.contains(x))
                 {if (true) throw new Error("The function is already defined");}
     functions.add(x.image);
+    funcParam.add(new HashMap<String,Integer>());
+    functionDefine.put(x.image, new ArrayList<String>());
     label_4:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -934,19 +1145,20 @@ public class Robot implements RobotConstants {
         break label_4;
       }
       jj_consume_token(38);
-      x = jj_consume_token(NAME);
+      y = jj_consume_token(NAME);
                 //Revisar si ya se declaro anteriormente esta variable
-                if(variables.containsKey(x)||functions.contains(x))
+                if(variables.containsKey(y)||functions.contains(y))
                         {if (true) throw new Error("The parameter is already defined");}
-        parameters.add(x.image);
+        parameters.add(y.image);
+        funcParam.get(functions.indexOf(x.image)).put(y.image,0);
         numParams++;
     }
     jj_consume_token(32);
-   funcParam.add(numParams);
     jj_consume_token(T_OUTPUT);
     commands();
     jj_consume_token(T_END);
-    parameters = new ArrayList<String>();
+    parameters = null;
+    noExec = false;
   }
 
 /*
@@ -955,13 +1167,13 @@ public class Robot implements RobotConstants {
   final public void callFunction() throws ParseException {
   Token x;
   int numParameters;
-  boolean func = parameters.size()>0;
+  boolean func = parameters!=null;
     x = jj_consume_token(NAME);
     if (!functions.contains(Integer.parseInt(x.image))) {
       {if (true) throw new Error("The function isn't defined");}
     }
     else {
-      numParameters = funcParam.get(functions.indexOf(x.image));
+      numParameters = funcParam.get(functions.indexOf(x.image)).size();
     }
     label_5:
     while (true) {
@@ -989,7 +1201,7 @@ public class Robot implements RobotConstants {
 */
   final public int numOrVar() throws ParseException, Error {
   Token x;
-  boolean func = parameters.size()>0;
+  boolean func = parameters!=null;
   boolean isParam = false;
   int val = 0;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
